@@ -16,8 +16,8 @@ after_success:
     if  [ "$TRAVIS_GO_VERSION" == "1.11.5" ]
     then
       mkdir build
-      docker build -t alexshe/kube-iptables-tailer .
-      sudo docker tag alexshe/kube-iptables-tailer alexshe/kube-iptables-tailer:$TRAVIS_BUILD_NUMBER
+      docker build -t alexshemesh/kube-iptables-tailer .
+      sudo docker tag alexshemesh/kube-iptables-tailer alexshemesh/kube-iptables-tailer:$TRAVIS_BUILD_NUMBER
     fi
 deploy:
   skip_cleanup: true
