@@ -1,4 +1,6 @@
 language: go
+services:
+  - docker
 go:
   - 1.11.5
 install: 
@@ -6,3 +8,20 @@ install:
 script:
   - make test-unit
   - .travis/check_workspace.sh
+after_success:
+  - |-
+    echo "After Success:"
+    echo $TRAVIS_BUILD_NUMBER
+    echo $TRAVIS_GO_VERSION
+    if  [ "$TRAVIS_GO_VERSION" == "1.11.5" ]
+    then
+      mkdir build
+      docker build -t alexshe/kube-iptables-tailer .
+      sudo docker tag alexshe/kube-iptables-tailer alexshe/kube-iptables-tailer:$TRAVIS_BUILD_NUMBER
+    fi
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: bash docker_push
+  on:
+    branch: master
