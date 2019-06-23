@@ -12,6 +12,8 @@ import (
 
 const fieldSrcIP = "SRC"
 const fieldDstIP = "DST"
+const fieldSrcPort = "SPT"
+const fieldDstPort = "DPT"
 const PacketDropLogTimeLayout = "2006-01-02T15:04:05.000000-07:00"
 
 // PacketDrop is the result object parsed from single raw log containing information about an iptables packet drop.
@@ -20,6 +22,8 @@ type PacketDrop struct {
 	HostName string
 	SrcIP    string
 	DstIP    string
+	SrcPort  string
+	DstPort  string
 }
 
 var fieldCount = reflect.ValueOf(PacketDrop{}).NumField()
@@ -34,7 +38,8 @@ func (pd PacketDrop) IsExpired() bool {
 	curTime := time.Now()
 	expiredMinutes := float64(util.GetEnvIntOrDefault(
 		util.PacketDropExpirationMinutes, util.DefaultPacketDropExpirationMinutes))
-	return curTime.Sub(logTime).Minutes() > expiredMinutes
+	retval := curTime.Sub(logTime).Minutes() > expiredMinutes
+	return retval
 }
 
 // Get the time object of PacketDrop log time
@@ -103,12 +108,23 @@ func getPacketDrop(packetDropLog string) (PacketDrop, error) {
 	if err != nil {
 		return PacketDrop{}, err
 	}
+	srcPort, err := getFieldValue(logFields, fieldSrcPort)
+	if err != nil {
+		srcPort = "undefined"
+	}
+	dstPort, err := getFieldValue(logFields, fieldDstPort)
+	if err != nil {
+		dstPort = "undefined"
+	}
 
 	return PacketDrop{
 			LogTime:  logTime,
 			HostName: hostName,
 			SrcIP:    srcIP,
-			DstIP:    dstIP},
+			DstIP:    dstIP,
+			SrcPort:  srcPort,
+			DstPort:  dstPort,
+		},
 		nil
 }
 
