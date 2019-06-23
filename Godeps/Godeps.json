@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/box/kube-iptables-tailer",
+	"ImportPath": "github.com/wix-playground/kube-iptables-tailer",
 	"GoVersion": "go1.11",
 	"GodepVersion": "v80",
 	"Deps": [

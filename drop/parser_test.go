@@ -2,7 +2,7 @@ package drop
 
 import (
 	"fmt"
-	"github.com/box/kube-iptables-tailer/util"
+	"github.com/wix-playground/kube-iptables-tailer/util"
 	"testing"
 	"time"
 )

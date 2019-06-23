@@ -3,8 +3,8 @@ package drop
 import (
 	"errors"
 	"fmt"
-	"github.com/box/kube-iptables-tailer/util"
 	"github.com/golang/glog"
+	"github.com/wix-playground/kube-iptables-tailer/util"
 	"reflect"
 	"strings"
 	"time"

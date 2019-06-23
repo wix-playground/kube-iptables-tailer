@@ -1,7 +1,7 @@
 # kube-iptables-tailer
 
 [![Project Status](https://opensource.box.com/badges/active.svg)](https://opensource.box.com/badges)
-[![Build Status](https://travis-ci.com/box/kube-iptables-tailer.svg?token=xQMR2mqCqLKhWA2AL639&branch=master)](https://travis-ci.com/box/kube-iptables-tailer)
+[![Build Status](https://travis-ci.com/wix-playground/kube-iptables-tailer.svg?token=xQMR2mqCqLKhWA2AL639&branch=master)](https://travis-ci.com/wix-playground/kube-iptables-tailer)
 
 kube-iptables-tailer is a service that gives you better visibility on networking issues in your Kubernetes cluster by detecting the traffic denied by iptables and surfacing corresponding information to the affected Pods via Kubernetes events.
 
@@ -31,12 +31,12 @@ Events:
 
 Download the source code package:
 ```shell
-$ git clone github.com/box/kube-iptables-tailer
+$ git clone github.com/wix-playground/kube-iptables-tailer
 ```
 
 Build the container from the source code (make sure you have Docker running):
 ```shell
-$ cd $GOPATH/src/github.com/box/kube-iptables-tailer
+$ cd $GOPATH/src/github.com/wix-playground/kube-iptables-tailer
 $ make container
 ```
 
