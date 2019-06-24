@@ -16,6 +16,8 @@ const fieldSrcPort = "SPT"
 const fieldDstPort = "DPT"
 const PacketDropLogTimeLayout = "2006-01-02T15:04:05.000000-07:00"
 
+var PossibleTimeFormats = []string{PacketDropLogTimeLayout, time.Stamp}
+
 // PacketDrop is the result object parsed from single raw log containing information about an iptables packet drop.
 type PacketDrop struct {
 	LogTime  string
@@ -88,16 +90,38 @@ func isRequiredPacketDropLog(logPrefix, log string) bool {
 	return false
 }
 
+// Parse out timestamp value from random text
+func getTimeFromPacketDrop(packetDropLog string) (retval string, timeLen int, err error) {
+	//time
+	for _, format := range PossibleTimeFormats {
+		targetString := packetDropLog[0:len(format)]
+		foundTime, err := time.Parse(format, targetString)
+		fmt.Print(foundTime)
+		if err == nil {
+			if foundTime.Year() == 0 {
+				foundTime = foundTime.AddDate(time.Now().Year(), 0, 0)
+			}
+			retval = foundTime.Format(PacketDropLogTimeLayout)
+			timeLen = len(format)
+			break
+		}
+	}
+	return retval, timeLen, err
+}
+
 // Return a PacketDrop object constructed from given PacketDropLog
 func getPacketDrop(packetDropLog string) (PacketDrop, error) {
-	// object PacketDrop needs at least 4 different fields
-	logFields, err := getPacketDropLogFields(packetDropLog)
+	//time can be in random format, lets get it first
+	logTime, timeLen, err := getTimeFromPacketDrop(packetDropLog)
+	// object PacketDrop needs at least 4 different fields, and we ofcourse skip time
+	logFields, err := getPacketDropLogFields(packetDropLog[timeLen:])
 	if err != nil {
 		return PacketDrop{}, err
 	}
 
 	// get log time and host name
-	logTime, hostName := logFields[0], logFields[1]
+	hostName := logFields[0]
+	//logTime, hostName := logFields[0], logFields[1]
 
 	// get src and dst IPs
 	srcIP, err := getFieldValue(logFields, fieldSrcIP)

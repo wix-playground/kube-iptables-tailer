@@ -54,6 +54,32 @@ func TestParsingDropLog(t *testing.T) {
 	}
 }
 
+func TestParsingDropKernelLogTimeFormat(t *testing.T) {
+	channel := make(chan PacketDrop, 100)
+	eventTime := time.Now().In(time.UTC)
+	eventTimeStr := eventTime.Format(time.Stamp)
+	// Our timestamp does not have nanseconds
+	eventTimeToExpect := eventTime.Truncate(time.Second).Format(PacketDropLogTimeLayout)
+	//2019, 6, 23, 18, 17, 16, 0, time.UTC)
+	testLog := fmt.Sprintf("%s %s kernel: [383376.014436] calico-packet: IN=eni3a0f5e4322a OUT=eth1 MAC=86:52:e0:ab:82:52:22:05:e3:af:1b:3c:08:00 SRC=%s DST=%s LEN=60 TOS=0x00 PREC=0x00 TTL=63 ID=5082 DF PROTO=TCP SPT=%s DPT=%s WINDOW=26883 RES=0x00 SYN URGP=0",
+		eventTimeStr, testHostname, testSrcIP, testDstIP, testSrcPort, testDstPort)
+
+	expected := PacketDrop{
+		LogTime:  eventTimeToExpect,
+		HostName: testHostname,
+		SrcIP:    testSrcIP,
+		DstIP:    testDstIP,
+		SrcPort:  testSrcPort,
+		DstPort:  testDstPort,
+	}
+	parse("calico-packet:", testLog, channel)
+
+	result := <-channel
+	if result != expected {
+		t.Fatalf("Expected %+v, but got result %+v", expected, result)
+	}
+}
+
 // Test if packet parser works for outdated packet drop (should not add it to channel)
 func TestParsingExpiredPacketDropLog(t *testing.T) {
 	channel := make(chan PacketDrop, 100)
