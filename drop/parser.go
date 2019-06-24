@@ -96,7 +96,6 @@ func getTimeFromPacketDrop(packetDropLog string) (retval string, timeLen int, er
 	for _, format := range PossibleTimeFormats {
 		targetString := packetDropLog[0:len(format)]
 		foundTime, err := time.Parse(format, targetString)
-		fmt.Print(foundTime)
 		if err == nil {
 			if foundTime.Year() == 0 {
 				foundTime = foundTime.AddDate(time.Now().Year(), 0, 0)
