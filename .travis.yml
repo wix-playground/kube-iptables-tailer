@@ -5,6 +5,7 @@ go:
   - 1.11.5
 install: 
   - echo "remove default travis_install to avoid getting workspace dirty with go dependency"
+  - go get -u github.com/golang/dep/...
 script:
   - make test-unit
   - .travis/check_workspace.sh
