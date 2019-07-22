@@ -6,6 +6,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/wix-playground/kube-iptables-tailer/drop"
 	"github.com/wix-playground/kube-iptables-tailer/event"
+	"github.com/wix-playground/kube-iptables-tailer/json_logger"
 	"github.com/wix-playground/kube-iptables-tailer/metrics"
 	"github.com/wix-playground/kube-iptables-tailer/util"
 	"net/http"
@@ -16,6 +17,7 @@ import (
 func main() {
 	flag.Parse()
 
+	json_logger.ConfigureLogger("/logs/ipt-tailer-json.log", "Info")
 	stopCh := make(chan struct{})
 	var vg sync.WaitGroup
 	vg.Add(4)

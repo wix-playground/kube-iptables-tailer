@@ -1,18 +1,13 @@
 package json_logger
 
-
 import (
-"github.com/sirupsen/logrus"
-"github.com/stretchr/testify/assert"
-"testing"
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func Test_LevelConfig(t *testing.T) {
-	SetLogConfig(Config{
-		Level:      "debug",
-		Colors:     false,
-		Properties: LogProperties{},
-	})
+	ConfigureLogger("test.json", "Debug")
 
 	entry := GetLog("test")
 

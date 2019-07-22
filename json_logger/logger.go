@@ -2,34 +2,38 @@ package json_logger
 
 import (
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"io"
 	"os"
+	"sync"
 )
 
-func GetLogger(obj string)(logger *logrus.Entry){
-	var log = logrus.New()
-	log.SetLevel(logrus.InfoLevel)
+var loggerEntry *logrus.Entry
 
-	log.SetFormatter(&log.JSONFormatter{})
-	dc_name := os.Getenv("DC_NAME")
-	app_name := os.Getenv("APP_NAME")
-	hostname := viper.BindEnv("podname", "HOSTNAME")
-	logger =log.WithFields(log.Fields{"dc_name": dc_name, "hostname": hostname,"app_name": app_name, "obj": obj })
-	return logger
+func GetLog(obj string) (retval *logrus.Entry) {
+	retval = logrus.New().WithField("obj", obj)
+	if loggerEntry != nil {
+		retval = loggerEntry.WithField("obj", obj)
+	}
+	return retval
 }
 
-
-
-
+func newLogEntry(logger *logrus.Logger) (retval *logrus.Entry) {
+	dc_name := os.Getenv("DC_NAME")
+	app_name := os.Getenv("APP_NAME")
+	hostname := os.Getenv("HOST_IP")
+	retval = logrus.NewEntry(logger).WithFields(logrus.Fields{"dc_name": dc_name,
+		"hostname": hostname,
+		"app_name": app_name})
+	return retval
+}
 
 type JsonLogHook struct {
 	levels       []logrus.Level
 	fileLogEntry *logrus.Entry
 }
 
-func NewJsonLogFileHook(fileName string, levelToSet logrus.Level, properties LogProperties) (retVal *JsonLogHook) {
+func NewJsonLogFileHook(fileName string, levelToSet logrus.Level) (retVal *JsonLogHook) {
 	fileLG := &lumberjack.Logger{
 		Filename:   fileName,
 		MaxSize:    100,
@@ -38,16 +42,16 @@ func NewJsonLogFileHook(fileName string, levelToSet logrus.Level, properties Log
 		Compress:   true,
 	}
 
-	return NewJsonLogHook(levelToSet, properties, fileLG)
+	return NewJsonLogHook(levelToSet, fileLG)
 }
 
-func NewJsonLogHook(levelToSet logrus.Level, properties LogProperties, writer io.Writer) (retVal *JsonLogHook) {
+func NewJsonLogHook(levelToSet logrus.Level, writer io.Writer) (retVal *JsonLogHook) {
 	logrusLogger := logrus.New()
 	logrusLogger.Level = levelToSet
 	logrusLogger.Out = writer
 	logrusLogger.Formatter = NewLogJsonFormatter()
 
-	newFileLogEntry := newLogEntry(logrusLogger, &properties)
+	newFileLogEntry := newLogEntry(logrusLogger)
 
 	levels := make([]logrus.Level, 0)
 	for _, nextLevel := range logrus.AllLevels {
@@ -93,4 +97,22 @@ func (hook *JsonLogHook) Levels() []logrus.Level {
 	return hook.levels
 }
 
+func ConfigureLogger(fileName string, logLevel string) {
+	lock := sync.Mutex{}
+	lock.Lock()
+	defer lock.Unlock()
 
+	levelStr := logLevel
+	logger := logrus.New()
+	level, err := logrus.ParseLevel(levelStr)
+	if err != nil {
+		panic(err)
+	}
+	logger.SetLevel(level)
+
+	fileHook := NewJsonLogFileHook(fileName, level)
+	logger.Hooks.Add(fileHook)
+
+	loggerEntry = logrus.NewEntry(logger)
+	GetLog("logging").Info("Logging module configured successfully", fileName, logLevel)
+}
