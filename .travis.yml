@@ -8,7 +8,7 @@ install:
   - go get -u github.com/golang/dep/...
 script:
   - make test-unit
-  - .travis/check_workspace.sh
+
 deploy:
   skip_cleanup: true
   provider: script
