@@ -3,3 +3,4 @@
 kube-iptables-tailer
 **/*.iml
 **/build
+vendor
