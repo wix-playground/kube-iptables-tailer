@@ -91,6 +91,7 @@ func convertDropToLogrusFields(packetDrop drop.PacketDrop, pod *v1.Pod, directio
 		"Direction":    direction,
 		"PodName":      pod.Name,
 		"PodNamespace": pod.Namespace,
+		"service_id":   pod.Labels["service"],
 		"LogTime":      packetDrop.LogTime,
 		"HostName":     packetDrop.HostName,
 		"SrcIP":        packetDrop.SrcIP,
