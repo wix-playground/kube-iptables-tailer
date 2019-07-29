@@ -17,7 +17,7 @@ import (
 func main() {
 	flag.Parse()
 
-	json_logger.ConfigureLogger("/logs/ipt-tailer-json.log", "Info")
+	json_logger.ConfigureLogger("/logs/wix_logstash_json.log", "Info")
 	stopCh := make(chan struct{})
 	var vg sync.WaitGroup
 	vg.Add(4)
