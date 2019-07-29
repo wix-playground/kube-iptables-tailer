@@ -85,18 +85,17 @@ func (poster *Poster) Run(stopCh <-chan struct{}, packetDropCh <-chan drop.Packe
 	}
 }
 
-func convertDropToLogrusFields(packetDrop drop.PacketDrop, podName string, direction string) (retval logrus.Fields) {
+func convertDropToLogrusFields(packetDrop drop.PacketDrop, podName string) (retval logrus.Fields) {
 
 	retval = logrus.Fields{
-		"Direction": direction,
-		"PodName":   podName,
-		"LogTime":   packetDrop.LogTime,
-		"HostName":  packetDrop.HostName,
-		"SrcIP":     packetDrop.SrcIP,
-		"DstIP":     packetDrop.DstIP,
-		"SrcPort":   packetDrop.SrcPort,
-		"DstPort":   packetDrop.DstPort,
-		"Protocol":  packetDrop.Protocol,
+		"PodName":  podName,
+		"LogTime":  packetDrop.LogTime,
+		"HostName": packetDrop.HostName,
+		"SrcIP":    packetDrop.SrcIP,
+		"DstIP":    packetDrop.DstIP,
+		"SrcPort":  packetDrop.SrcPort,
+		"DstPort":  packetDrop.DstPort,
+		"Protocol": packetDrop.Protocol,
 	}
 	return retval
 }
@@ -104,6 +103,9 @@ func convertDropToLogrusFields(packetDrop drop.PacketDrop, podName string, direc
 // Handle the given PacketDrop, return error if api server does not work
 func (poster *Poster) handle(packetDrop drop.PacketDrop) error {
 	jsonLog := json_logger.GetLog("poster")
+	if jsonLog == nil {
+		print("Cannot get json_logger")
+	}
 	if poster.shouldIgnore(packetDrop) {
 		return nil
 	}
@@ -119,17 +121,20 @@ func (poster *Poster) handle(packetDrop drop.PacketDrop) error {
 	// update metrics and post events
 	srcName := getNamespaceOrHostName(srcPod, packetDrop.SrcIP, net.DefaultResolver)
 	dstName := getNamespaceOrHostName(dstPod, packetDrop.DstIP, net.DefaultResolver)
-
+	log_fields := convertDropToLogrusFields(packetDrop, srcPod.Name)
+	if log_fields == nil {
+		print("Canot generate json fields")
+	}
 	if srcPod != nil && !srcPod.Spec.HostNetwork {
 		message := getPacketDropMessage(dstName, packetDrop.DstIP, packetDrop.DstPort, send, packetDrop.Protocol)
-		jsonLog.WithFields(convertDropToLogrusFields(packetDrop, srcPod.Name, "send")).Info("Packet drop during SEND")
+		jsonLog.WithFields(log_fields).WithField("Direction", "SEND").Info("Packet drop during SEND")
 		if err := poster.submitEvent(srcPod, message); err != nil {
 			return err
 		}
 	}
 	if dstPod != nil && !dstPod.Spec.HostNetwork {
 		message := getPacketDropMessage(srcName, packetDrop.SrcIP, packetDrop.DstPort, receive, packetDrop.Protocol)
-		jsonLog.WithFields(convertDropToLogrusFields(packetDrop, srcPod.Name, "receive")).Info("Packet drop during RECIEVE")
+		jsonLog.WithFields(log_fields).WithField("Direction", "RECIEVE").Info("Packet drop during RECIEVE")
 		if err := poster.submitEvent(dstPod, message); err != nil {
 			return err
 		}

@@ -114,5 +114,5 @@ func ConfigureLogger(fileName string, logLevel string) {
 	logger.Hooks.Add(fileHook)
 
 	loggerEntry = logrus.NewEntry(logger)
-	GetLog("logging").Info("Logging module configured successfully", fileName, logLevel)
+	GetLog("logging").Info("Logging module configured successfully ", fileName, logLevel)
 }
