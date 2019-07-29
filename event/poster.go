@@ -85,18 +85,19 @@ func (poster *Poster) Run(stopCh <-chan struct{}, packetDropCh <-chan drop.Packe
 	}
 }
 
-func convertDropToLogrusFields(packetDrop drop.PacketDrop, podName string, direction string) (retval logrus.Fields) {
+func convertDropToLogrusFields(packetDrop drop.PacketDrop, pod *v1.Pod, direction string) (retval logrus.Fields) {
 
 	retval = logrus.Fields{
-		"Direction": direction,
-		"PodName":   podName,
-		"LogTime":   packetDrop.LogTime,
-		"HostName":  packetDrop.HostName,
-		"SrcIP":     packetDrop.SrcIP,
-		"DstIP":     packetDrop.DstIP,
-		"SrcPort":   packetDrop.SrcPort,
-		"DstPort":   packetDrop.DstPort,
-		"Protocol":  packetDrop.Protocol,
+		"Direction":    direction,
+		"PodName":      pod.Name,
+		"PodNamespace": pod.Namespace,
+		"LogTime":      packetDrop.LogTime,
+		"HostName":     packetDrop.HostName,
+		"SrcIP":        packetDrop.SrcIP,
+		"DstIP":        packetDrop.DstIP,
+		"SrcPort":      packetDrop.SrcPort,
+		"DstPort":      packetDrop.DstPort,
+		"Protocol":     packetDrop.Protocol,
 	}
 	return retval
 }
@@ -125,7 +126,7 @@ func (poster *Poster) handle(packetDrop drop.PacketDrop) error {
 
 	if srcPod != nil && !srcPod.Spec.HostNetwork {
 		message := getPacketDropMessage(dstName, packetDrop.DstIP, packetDrop.DstPort, send, packetDrop.Protocol)
-		log_fields := convertDropToLogrusFields(packetDrop, srcPod.Name, "SEND")
+		log_fields := convertDropToLogrusFields(packetDrop, srcPod, "SEND")
 		jsonLog.WithFields(log_fields).Info("Packet drop during SEND")
 		if err := poster.submitEvent(srcPod, message); err != nil {
 			return err
@@ -133,7 +134,7 @@ func (poster *Poster) handle(packetDrop drop.PacketDrop) error {
 	}
 	if dstPod != nil && !dstPod.Spec.HostNetwork {
 		message := getPacketDropMessage(srcName, packetDrop.SrcIP, packetDrop.DstPort, receive, packetDrop.Protocol)
-		log_fields := convertDropToLogrusFields(packetDrop, dstPod.Name, "RECIEVE")
+		log_fields := convertDropToLogrusFields(packetDrop, dstPod, "RECIEVE")
 		jsonLog.WithFields(log_fields).Info("Packet drop during RECIEVE")
 		if err := poster.submitEvent(dstPod, message); err != nil {
 			return err
