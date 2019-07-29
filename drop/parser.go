@@ -14,6 +14,7 @@ const fieldSrcIP = "SRC"
 const fieldDstIP = "DST"
 const fieldSrcPort = "SPT"
 const fieldDstPort = "DPT"
+const fieldProtocol = "PROTO"
 const PacketDropLogTimeLayout = "2006-01-02T15:04:05.000000-07:00"
 
 var PossibleTimeFormats = []string{PacketDropLogTimeLayout, time.Stamp}
@@ -26,6 +27,7 @@ type PacketDrop struct {
 	DstIP    string
 	SrcPort  string
 	DstPort  string
+	Protocol string
 }
 
 var fieldCount = reflect.ValueOf(PacketDrop{}).NumField()
@@ -140,6 +142,10 @@ func getPacketDrop(packetDropLog string) (PacketDrop, error) {
 		dstPort = "undefined"
 	}
 
+	protocol, err := getFieldValue(logFields, fieldProtocol)
+	if err != nil {
+		protocol = "undefined"
+	}
 	return PacketDrop{
 			LogTime:  logTime,
 			HostName: hostName,
@@ -147,6 +153,7 @@ func getPacketDrop(packetDropLog string) (PacketDrop, error) {
 			DstIP:    dstIP,
 			SrcPort:  srcPort,
 			DstPort:  dstPort,
+			Protocol: protocol,
 		},
 		nil
 }

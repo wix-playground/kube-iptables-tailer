@@ -14,6 +14,7 @@ const (
 	testDstIP     = "22.222.22.222"
 	testSrcPort   = "32157"
 	testDstPort   = "445"
+	testProtocol  = "TCP"
 )
 
 // Test if PacketDrop.IsExpired() works
@@ -37,7 +38,8 @@ func TestParsingDropLog(t *testing.T) {
 	channel := make(chan PacketDrop, 100)
 	// need to use curTime because parse() will not insert expired packetDrop
 	curTime := time.Now().Format(PacketDropLogTimeLayout)
-	testLog := fmt.Sprintf("%s %s %s SRC=%s DST=%s SPT=%s DPT=%s", curTime, testHostname, testLogPrefix, testSrcIP, testDstIP, testSrcPort, testDstPort)
+
+	testLog := fmt.Sprintf("%s %s %s SRC=%s DST=%s SPT=%s DPT=%s PROTO=%s", curTime, testHostname, testLogPrefix, testSrcIP, testDstIP, testSrcPort, testDstPort, testProtocol)
 	expected := PacketDrop{
 		LogTime:  curTime,
 		HostName: testHostname,
@@ -45,6 +47,7 @@ func TestParsingDropLog(t *testing.T) {
 		DstIP:    testDstIP,
 		SrcPort:  testSrcPort,
 		DstPort:  testDstPort,
+		Protocol: testProtocol,
 	}
 	parse(testLogPrefix, testLog, channel)
 
@@ -71,6 +74,7 @@ func TestParsingDropKernelLogTimeFormat(t *testing.T) {
 		DstIP:    testDstIP,
 		SrcPort:  testSrcPort,
 		DstPort:  testDstPort,
+		Protocol: testProtocol,
 	}
 	parse("calico-packet:", testLog, channel)
 

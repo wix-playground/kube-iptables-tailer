@@ -96,6 +96,7 @@ func convertDropToLogrusFields(packetDrop drop.PacketDrop, podName string, direc
 		"DstIP":     packetDrop.DstIP,
 		"SrcPort":   packetDrop.SrcPort,
 		"DstPort":   packetDrop.DstPort,
+		"Protocol":  packetDrop.Protocol,
 	}
 	return retval
 }
@@ -120,14 +121,14 @@ func (poster *Poster) handle(packetDrop drop.PacketDrop) error {
 	dstName := getNamespaceOrHostName(dstPod, packetDrop.DstIP, net.DefaultResolver)
 
 	if srcPod != nil && !srcPod.Spec.HostNetwork {
-		message := getPacketDropMessage(dstName, packetDrop.DstIP, packetDrop.DstPort, send)
+		message := getPacketDropMessage(dstName, packetDrop.DstIP, packetDrop.DstPort, send, packetDrop.Protocol)
 		jsonLog.WithFields(convertDropToLogrusFields(packetDrop, srcPod.Name, "send")).Info("Packet drop during SEND")
 		if err := poster.submitEvent(srcPod, message); err != nil {
 			return err
 		}
 	}
 	if dstPod != nil && !dstPod.Spec.HostNetwork {
-		message := getPacketDropMessage(srcName, packetDrop.SrcIP, packetDrop.DstPort, receive)
+		message := getPacketDropMessage(srcName, packetDrop.SrcIP, packetDrop.DstPort, receive, packetDrop.Protocol)
 		jsonLog.WithFields(convertDropToLogrusFields(packetDrop, srcPod.Name, "receive")).Info("Packet drop during RECIEVE")
 		if err := poster.submitEvent(dstPod, message); err != nil {
 			return err

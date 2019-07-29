@@ -146,7 +146,7 @@ func getNamespaceOrHostName(pod *v1.Pod, ip string, resolver DnsResolver) string
 }
 
 // Helper function to construct packet drop message
-func getPacketDropMessage(otherSideServiceName string, ip string, port string, direction TrafficDirection) string {
+func getPacketDropMessage(otherSideServiceName string, ip string, port string, direction TrafficDirection, protocol string) string {
 	var buffer bytes.Buffer
 	buffer.WriteString("Packet dropped")
 	// append traffic direction
@@ -158,13 +158,15 @@ func getPacketDropMessage(otherSideServiceName string, ip string, port string, d
 	// append other side's service name
 	buffer.WriteString(otherSideServiceName)
 	if otherSideServiceName != ip && ip != "" {
+
 		buffer.WriteString(" (")
 		buffer.WriteString(ip)
-
 		buffer.WriteString(")")
 	}
 	buffer.WriteString(" target port:")
 	buffer.WriteString(port)
+	buffer.WriteString(" ")
+	buffer.WriteString(protocol)
 	return buffer.String()
 }
 

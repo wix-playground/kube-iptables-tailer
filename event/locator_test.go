@@ -70,16 +70,16 @@ func TestGetPacketDropMessageForPods(t *testing.T) {
 	ipAddress := "123.456.789"
 	serviceName := getNamespaceOrHostName(testPod, ipAddress, net.DefaultResolver)
 	// test send traffic
-	resultSending := getPacketDropMessage(serviceName, ipAddress, "123", send)
-	expectedSending := fmt.Sprintf("Packet dropped when sending traffic to %s (%s) target port:123",
+	resultSending := getPacketDropMessage(serviceName, ipAddress, "123", send, "TCP")
+	expectedSending := fmt.Sprintf("Packet dropped when sending traffic to %s (%s) target port:123 TCP",
 		namespace, ipAddress)
 	if resultSending != expectedSending {
 		t.Fatalf("Expected: %v, but got result: %v", expectedSending, resultSending)
 	}
 
 	// test receive traffic
-	resultReceiving := getPacketDropMessage(serviceName, ipAddress, "123", receive)
-	expectedReceiving := fmt.Sprintf("Packet dropped when receiving traffic from %s (%s) target port:123",
+	resultReceiving := getPacketDropMessage(serviceName, ipAddress, "123", receive, "TCP")
+	expectedReceiving := fmt.Sprintf("Packet dropped when receiving traffic from %s (%s) target port:123 TCP",
 		namespace, ipAddress)
 	if resultReceiving != expectedReceiving {
 		t.Fatalf("Expected: %v, but got result: %v", expectedReceiving, resultReceiving)
@@ -96,16 +96,16 @@ func TestGetPacketDropMessageForHosts(t *testing.T) {
 	serviceName := getNamespaceOrHostName(nil, ipAddress, mockedResolver)
 
 	// test send traffic
-	resultSending := getPacketDropMessage(serviceName, ipAddress, "123", send)
-	expectedSending := fmt.Sprintf("Packet dropped when sending traffic to %s (%s) target port:123",
+	resultSending := getPacketDropMessage(serviceName, ipAddress, "123", send, "TCP")
+	expectedSending := fmt.Sprintf("Packet dropped when sending traffic to %s (%s) target port:123 TCP",
 		hostName, ipAddress)
 	if resultSending != expectedSending {
 		t.Fatalf("Expected: %v, but got result: %v", expectedSending, resultSending)
 	}
 
 	// test receive traffic
-	resultReceiving := getPacketDropMessage(serviceName, ipAddress, "123", receive)
-	expectedReceiving := fmt.Sprintf("Packet dropped when receiving traffic from %s (%s) target port:123",
+	resultReceiving := getPacketDropMessage(serviceName, ipAddress, "123", receive, "TCP")
+	expectedReceiving := fmt.Sprintf("Packet dropped when receiving traffic from %s (%s) target port:123 TCP",
 		hostName, ipAddress)
 	if resultReceiving != expectedReceiving {
 		t.Fatalf("Expected: %v, but got result: %v", expectedReceiving, resultReceiving)
@@ -114,8 +114,8 @@ func TestGetPacketDropMessageForHosts(t *testing.T) {
 	// test when DNS lookup returns empty hostname, should return IP address
 	mockedResolver = initMockDnsResolver()
 	serviceName = getNamespaceOrHostName(nil, ipAddress, mockedResolver)
-	resultDnsEmpty := getPacketDropMessage(serviceName, ipAddress, "123", send)
-	expectedDnsEmpty := fmt.Sprintf("Packet dropped when sending traffic to %s target port:123", ipAddress)
+	resultDnsEmpty := getPacketDropMessage(serviceName, ipAddress, "123", send, "TCP")
+	expectedDnsEmpty := fmt.Sprintf("Packet dropped when sending traffic to %s target port:123 TCP", ipAddress)
 	if resultSending != expectedSending {
 		t.Fatalf("Expected: %v, but got result: %v", expectedDnsEmpty, resultDnsEmpty)
 	}
@@ -124,8 +124,8 @@ func TestGetPacketDropMessageForHosts(t *testing.T) {
 	mockedResolver = initMockDnsResolver()
 	mockedResolver.err = errors.New("DNS lookup fails")
 	serviceName = getNamespaceOrHostName(nil, ipAddress, mockedResolver)
-	resultDnsFails := getPacketDropMessage(serviceName, ipAddress, "123", receive)
-	expectedDnsFails := fmt.Sprintf("Packet dropped when sending traffic to %s target port:123", ipAddress)
+	resultDnsFails := getPacketDropMessage(serviceName, ipAddress, "123", receive, "TCP")
+	expectedDnsFails := fmt.Sprintf("Packet dropped when sending traffic to %s target port:123 TCP", ipAddress)
 	if resultSending != expectedSending {
 		t.Fatalf("Expected: %v, but got result: %v", expectedDnsFails, resultDnsFails)
 	}

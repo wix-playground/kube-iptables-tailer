@@ -21,7 +21,7 @@ func GetLog(obj string) (retval *logrus.Entry) {
 func newLogEntry(logger *logrus.Logger) (retval *logrus.Entry) {
 	dc_name := os.Getenv("DC_NAME")
 	app_name := os.Getenv("APP_NAME")
-	hostname := os.Getenv("HOST_IP")
+	hostname := os.Getenv("HOST_NAME")
 	retval = logrus.NewEntry(logger).WithFields(logrus.Fields{"dc_name": dc_name,
 		"hostname": hostname,
 		"app_name": app_name})
